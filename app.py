@@ -5,8 +5,17 @@ Streamlit приложение для распознавания объекто�
 import streamlit as st
 import os
 from PIL import Image
-import cv2
 import numpy as np
+try:
+    import cv2
+    CV2_AVAILABLE = True
+except ImportError:
+    CV2_AVAILABLE = False
+    try:
+        import cv2.cv2 as cv2
+        CV2_AVAILABLE = True
+    except ImportError:
+        CV2_AVAILABLE = False
 from object_detection import ObjectDetector, TRANSLATION_DICT
 
 # Настройка страницы
@@ -156,7 +165,12 @@ with col2:
                         st.success(f"✅ Найдено объектов: {result['total_objects']}")
                         
                         # Аннотированное изображение
-                        annotated_rgb = cv2.cvtColor(result['annotated_image'], cv2.COLOR_BGR2RGB)
+                        # Конвертация BGR в RGB (YOLO возвращает BGR формат)
+                        if CV2_AVAILABLE:
+                            annotated_rgb = cv2.cvtColor(result['annotated_image'], cv2.COLOR_BGR2RGB)
+                        else:
+                            # Fallback: используем numpy для конвертации
+                            annotated_rgb = np.flip(result['annotated_image'], axis=2)  # BGR -> RGB
                         st.image(annotated_rgb, caption="Распознанные объекты", use_container_width=True)
                         
                         # Таблица обнаруженных объектов

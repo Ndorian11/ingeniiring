@@ -42,6 +42,13 @@ python example.py
 
 ## Решение проблем
 
+### Ошибка `libGL.so.1: cannot open shared object file`
+Проект использует `opencv-python-headless`, который не требует системных графических библиотек. Если ошибка все еще возникает:
+```bash
+pip uninstall opencv-python opencv-contrib-python
+pip install opencv-python-headless
+```
+
 ### Ошибка загрузки модели
 Убедитесь, что у вас есть подключение к интернету для первой загрузки модели.
 

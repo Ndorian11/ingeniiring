@@ -9,7 +9,17 @@ from gtts import gTTS
 import os
 import matplotlib.pyplot as plt
 import numpy as np
-import cv2
+try:
+    import cv2
+    CV2_AVAILABLE = True
+except ImportError:
+    CV2_AVAILABLE = False
+    # Fallback для случаев, когда cv2 недоступен
+    try:
+        import cv2.cv2 as cv2
+        CV2_AVAILABLE = True
+    except ImportError:
+        CV2_AVAILABLE = False
 from collections import Counter
 import requests
 from io import BytesIO
