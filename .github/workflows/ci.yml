@@ -1,0 +1,49 @@
+name: CI Pipeline
+
+# Пайплайн запускается при любом push или pull request в ветку main (или master)
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Клонируем репозиторий на сервер GitHub
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # 2. Устанавливаем Python
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+        # Кэширование pip ускорит повторные запуски CI
+        cache: 'pip'
+
+    # 3. Устанавливаем зависимости
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    # 4. Проверяем форматирование кода инструментом Black
+    - name: Check code formatting with Black
+      run: |
+        black --check app.py object_detection.py test_object_detection.py
+
+    # 5. Проверяем код на синтаксические ошибки и стиль с помощью Flake8
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero трактует все предупреждения как предупреждения, а не критические ошибки (можно настроить строже)
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+    # 6. Запускаем написанные Unit-тесты
+    - name: Run tests with pytest
+      run: |
+        pytest test_object_detection.py -v
